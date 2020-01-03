@@ -1,0 +1,16 @@
+﻿1. 先后安装python2.7和安装mysql5.5(初始数据库密码设置为168168)
+
+2. 新建数据库 库名为mooc2
+
+3. 打开终端，进入工程根目录
+
+4. mysqladmin 导入sql文件，导入的管理员账户密码是admin 123456a
+(失败的话，就在终端执行makemigrations和migrate)
+
+5. pip install -r requirements.txt 安装依赖包
+
+6. python manage.py createsuperuser
+
+7. python manage.py runserver
+
+8. 浏览器中输入 127.0.0.1:8000访问

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+<head>
+    <meta charset="UTF-8">
+    <title>收藏课程-{{ company.SITE }}</title>
+    <link href="{% static 'mooc/css/usercenter.css' %}" rel="stylesheet">
+    <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+    <script src="{% static 'mooc/js/usercenter.js' %}"></script>
+    <script>
+        $(function () {
+            $(".stop_fav").click(function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url "operation:user_favorite" %}",
+                    data: {'fav_id': $(this).attr("data-id"), 'fav_type': 1},
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.Code == 0) {
+                            alert("已取消收藏");
+                            window.location.reload();
+                        }
+                    },
+                });
+            })
+            $(".course_detail").click(function(){
+                window.location.href = "http://"+window.location.host+"/course/detail/"+$(this).attr("data-id");
+            })
+        })
+    </script>
+</head>
+<body>
+<div id="root">
+    <div id="reactRoot">
+        <div class="_2UKj4">
+            <div class="_3UHJr">
+                <div class="_3yuli"><a href="/"><img
+                        src="{% static 'mooc/image/header_logo.png' %}"
+                        alt="logo"></a></div>
+                <div class="JS7zp"><a href="/">首页</a><a href="{% url 'course:course_list' %}">全部课程</a><a href="#"
+                                                                                                         style="display:none;">待定菜单</a>
+                </div>
+                <div class="_1j-ox"><input maxlength="20" type="text" placeholder="搜索课程关键词"><a
+                        href="javascript:;">搜索</a></div>
+                <div class="_217pm">
+                    <div class="_1bEof"><span class="_3iQZm ant-badge"><div class="_3cI36"></div></span>
+                        <div class="_1aqJh"><a href="{% url 'users:user_info' %}">
+                            {% if request.user.image != '' %}
+                                <img title="{{ request.user.nick_name }}"
+                                     src="{{ MEDIA_URL }}{{ request.user.image }}"
+                                     alt="头像" style="position: relative;">
+
+                            {% else %}
+                                <img title="{{ request.user.nickname }}"
+                                     src="{{ MEDIA_URL }}image/users/home_default_header.png"
+                                     alt="头像" style="position: relative;">
+                            {% endif %}
+                        </a>
+                            <div class="_2v85p"><em class="member-box"></em>
+                                <ul>
+                                    <li style="display: none;"><a href="#">我的授课</a></li>
+                                    <li><a href="{% url 'users:mycourse' %}">学习课程</a></li>
+                                    <li><a href="{% url 'users:user_info' %}">个人信息</a></li>
+                                    <li><a href="{% url 'logout' %}">退出登录</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        {% if request.user.nick_name != '' %}
+                            <span class="_3Au-A userNickname"
+                                  title="{{ request.user.nick_name }}">{{ request.user.nick_name }}</span>
+                        {% else %}
+                            <span class="_3Au-A userNickname"
+                                  title="{{ request.user.username }}">{{ request.user.username }}</span>
+                        {% endif %}
+                        <div>
+                            <div class="oh0MF react-draggable" id="private_chat_win"
+                                 style="touch-action: none; top: 94.5px; left: 250px; transform: translate(0px, 0px); display: none;">
+                                <div class="_338sv" id="private_contact_wrap" style="width: 0px;">
+                                    <ul class="_2vNN5"></ul>
+                                </div>
+                                <div class="b1hd_" style="margin-left: 0px;">
+                                    <div class="_1fbBO" id="chat_with_info"><span></span><span class="_3HSzw"></span>
+                                    </div>
+                                    <div class="-rUZG">
+                                        <div class="s3gIE"><img src="/static/mooc/image/NoNo.32f2bd65.jpg"
+                                                                alt="not-chat"><span>暂无新消息</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="_3p0h7">
+            <div class="_3WUlw">
+                <ul>
+                    <li class="-jFKi" style="display: none;"><a href="#">我的授课</a></li>
+                    <li class="-jFKi"><a href="{% url 'users:mycourse' %}">学习课程</a></li>
+                    <li class="-jFKi VrjG_"><a href="{% url 'users:myfav_course' %}">收藏课程</a></li>
+                    <li class="-jFKi"><a href="{% url 'users:myfav_teacher' %}">关注老师</a></li>
+                    <li class="-jFKi"><a href="{% url 'users:user_info' %}">个人资料</a></li>
+                </ul>
+            </div>
+            <div class="qtQ6s">
+                <div class="adminContentBody">
+                    <div class="_2HiiN"><a href="javascript:;">收藏课程</a>
+                        <ul>
+                            <li class=""><a href="javascript:;">公开课</a></li>
+                        </ul>
+                    </div>
+                    <div class="_2GxAN">
+                        <div class="_1Zcg9">
+                            <div class="_2u4ro">
+                                {% if fav_courses_num == 0 %}
+                                    <div class="_1T7VH"><img
+                                            src="{% static 'mooc/image/NoNo.32f2bd65.jpg' %}"
+                                            alt="暂时没有收藏课程">
+                                        <h2>暂时没有收藏课程</h2><a href="{% url 'course:course_list' %}">去逛逛</a></div>
+                                {% else %}
+                                    {% for fav_course in fav_courses %}
+                                        <div class="TlhQy"><a href="{% url 'course:course_detail' fav_course.id %}"
+                                                              target="_blank" rel="noopener noreferrer"
+                                                              class="_1TOYf"><img
+                                                src="{{ MEDIA_URL }}{{ fav_course.image }}"
+                                                alt="封面">
+                                                <span class="_27EfR">公开课</span>
+
+                                            <span style="display: none;"
+                                                  class="UmVGD"></span></a>
+                                            <div class="_3f44N"><a href="{% url 'course:course_detail' fav_course.id %}"
+                                                                   target="_blank"
+                                                                   rel="noopener noreferrer"
+                                                                   class="_1gBLk">{{ fav_course.name }}</a>
+                                            </div>
+                                            <div style="display: flex; flex-direction: column; float: right;">
+                                                <button class="_3xDIx course_detail" data-id={{ fav_course.id }}>课程详情
+                                                </button>
+                                                <button class="_3xDIx stop_fav" data-id={{ fav_course.id }}
+                                                        style="display:block;background-color:rgb(204,204,204);color:rgb(51,51,51);border:none;font-size:12px;outline:none;">取消收藏
+                                                </button>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="_3LWKs">
+            <div class="w1200">
+                <div class="_3aJyk"><p class="_2DW2R"><a href="javascript:;"><img
+                        src="/static/mooc/image/footer_subwb.png" alt="关注微博"><img
+                        src="/static/mooc/image/footer_qrwb.jpg" alt="大图" class="_2zzbZ"></a><a
+                        href="javascript:;"><img src="/static/mooc/image/footer_subwx.png"
+                                                 alt="关注微信"><img src="/static/mooc/image/footer_qrwx.jpg"
+                                                                 alt="大图" class="_2zzbZ"></a></p><img
+                        src="/static/mooc/image/footer_phone.png" alt="联系方式"></div>
+                <div class="yd8x8">
+                    <div class="_2LU72">
+                        <div class="_3qvba">
+                            <div class="_3NmFM"><a target="_blank" rel="noopener noreferrer"
+                                                   href="http://www.miitbeian.gov.cn">备案号：{{ company.ICP_REC }}</a><a
+                                    target="_blank" rel="noopener noreferrer" href="#">公网安备
+                                {{ company.SECURITY_REC }}</a><a href="#" target="_blank" rel="noopener noreferrer" title="行业认证">
+                                <img height="15" src="/static/mooc/image/footer_hyrz.png" alt="lm"></a></div>
+                            <p>Copyright © 2019 {{ company.SITE }}-{{ company.COMPANY }} 版权所有</p></div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+</body>
+</html>

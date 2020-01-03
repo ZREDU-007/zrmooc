@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh">
+{% load staticfiles %}
+<head>
+    <meta charset="UTF-8">
+    <title>课程列表-{{ company.SITE }}</title>
+    <link href="{% static 'mooc/css/course-list.css' %}" rel="stylesheet">
+    <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+    <script src="{% static 'mooc/js/course-list.js' %}"></script>
+    <script>
+        has_sub_category = {{ has_sub_category }}
+    </script>
+</head>
+<body>
+<div class="root">
+    <div class="reactRoot">
+        <div class="_3EVdm">
+            <div class="_3Ja6X">
+                <div class="_1LlpG"><a href="/"><img
+                        src="{% static 'mooc/image/header_logo.png' %}" alt="全部课程logo"></a></div>
+                <div class="_3HQec"><a href="/">首页</a><a href="?">全部课程</a><a href="#" style="display: none;">
+                    待定啊</a>
+                </div>
+                <div class="_3AT4J"><input maxlength="20" type="text" placeholder="搜索课程关键词" value=""><a
+                        href="javascript:;">搜索</a></div>
+                <div class="RZ1kP">
+                    {% if request.user.is_authenticated %}
+                        <div class="_1bEof"><span class="_3iQZm ant-badge"><div class="_3cI36"></div></span>
+                            <div class="_1aqJh"><a href="{% url 'users:user_info' %}">
+                                {% if request.user.image != '' %}
+                                    <img title="{{ request.user.nick_name }}"
+                                         src="{{ MEDIA_URL }}{{ request.user.image }}"
+                                         alt="头像" style="position: relative;">
+                                {% else %}
+                                    <img title="{{ request.user.nickname }}"
+                                         src="{{ MEDIA_URL }}image/users/home_default_header.png"
+                                         alt="头像" style="position: relative;">
+
+                                {% endif %}
+                            </a>
+                                <div class="_2v85p"><em class="member-box"></em>
+                                    <ul>
+                                        <li style="display: none;"><a href="#">我的授课</a></li>
+                                        <li><a href="{% url 'users:mycourse' %}">学习课程</a></li>
+                                        <li><a href="{% url 'users:user_info' %}">个人信息</a></li>
+                                        <li><a href="{% url 'logout' %}">退出登录</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            {% if request.user.nick_name != '' %}
+                                <span class="_3Au-A userNickname"
+                                      title="{{ request.user.nick_name }}">{{ request.user.nick_name }}</span>
+                            {% else %}
+                                <span class="_3Au-A userNickname"
+                                      title="{{ request.user.username }}">{{ request.user.username }}</span>
+                            {% endif %}
+                            <div></div>
+                        </div>
+                    {% else %}
+                        <div class="_3mYds" style="color: rgb(51, 51, 51);"><a href="javascript:;"
+                                                                               style="color: rgb(51, 51, 51);" data-url="{% url 'login' %}">
+                            <div>登录</div>
+                        </a>|<a href="javascript:;" style="color: rgb(51, 51, 51);" data-url="{% url 'register' %}">
+                            <div>注册</div>
+                        </a></div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div style="min-height: calc(100vh-180px);background: rgb(248,248,248)">
+            <div class="_2XGoJ">
+                <div class="f1ogg">
+                    <div style="display: block;">全部课程：<a class="_2TT5I" style="color: rgb(48, 115, 244);"
+                                                         href="?">全部</a>
+                        {% for root_category in root_categorys %}
+                            <a class="_2TT5I"
+                               href="?category={{ root_category.id }}">{{ root_category.name }}</a>{% endfor %}</div>
+
+                    <div style="display: none;"><a href="{% url 'course:course_list' %}">全部课程</a><span class="_2pac0"> &gt; </span>
+                        {% for breadcrumb in breadcrumbs %}
+                            {% if forloop.last %}
+                                <span><a class="Jx4hb"><a
+                                        href="?category={{ breadcrumb.id }}">{{ breadcrumb }}</a></span>
+                            {% else %}
+                                <span><a class="Jx4hb"><a href="?category={{ breadcrumb.id }}">{{ breadcrumb }}</a><span
+                                        class="_2pac0"> &gt; </span></span>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="_2sZuJ">
+                    <div style="display: block;">
+                        <a class="_3l8UB">全部</a>
+                        {% for second_category in second_categorys %}
+                            <a href="?category={{ second_category.id }}">{{ second_category.name }}</a>{% endfor %}
+                    </div>
+
+                    <div style="display: none;">
+                        <a class="_3l8UB">全部</a>
+                        {% for current_sub_category in current_sub_categorys %}
+                            <a href="?category={{ current_sub_category.id }}">{{ current_sub_category.name }}</a>{% endfor %}
+                    </div>
+                </div>
+                <div>
+                    <div class="_2mWPv">
+                        <div class="QnB63">
+                            <div class="_1wxYr">
+                                <div>综合排序</div>
+                                <ul>
+                                    <li><label class="ant-checkbox-wrapper"><span class="ant-checkbox"><input
+                                            type="checkbox" class="ant-checkbox-input" value="type-5311"><span
+                                            class="ant-checkbox-inner"></span></span><span> 免费课程</span></label></li>
+                                    <li><label class="ant-checkbox-wrapper"><span class="ant-checkbox"><input
+                                            type="checkbox" class="ant-checkbox-input" value="type-5310"><span
+                                            class="ant-checkbox-inner"></span></span><span> VIP精品课程</span></label></li>
+                                    <li class="f6G-g"><span>难度选择</span><img
+                                            src="{% static 'mooc/image/course_arrow_down.png' %}" alt="">
+                                        <div class="_3jvAp"><p class="_3ZNPH">难度选择</p>
+                                            <p>初 级</p>
+                                            <p>中 级</p>
+                                            <p>高 级</p></div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="hMrLb">
+                                <div class="_3pTJn" id="tzPage">
+                                    <ul class="ant-pagination ant-pagination-simple ">
+                                        <li title="Previous Page" class="ant-pagination-disabled ant-pagination-prev"
+                                            aria-disabled="true">共有{{ courses_num }}个课程
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% if courses_num == 0 %}
+                            <div class="_1yn72">
+                                <div><img src="{% static 'mooc/image/NoNo.32f2bd65.jpg' %}"
+                                          alt="暂无更多">
+                                    <div class="_1bC2n" style="font-size: 24px;">暂无课程</div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="_1Ifxn">
+                                {% for course in all_courses.object_list %}
+                                    <div class="_3JNgy">
+                                        <div class="_3T863">
+                                            <div class="yiEiS"><a href="{% url 'course:course_detail' course.id %}"
+                                                                  class="_3TnVR" target="_blank"><span
+                                                    class="_2_QPL"></span><span class="_1T9U5">
+
+                                        {% if course.is_free == 0 %}
+                                            {% if course.students < 1000 %}
+                                            {% else %}
+                                                <span class="BjfNz"><img
+                                                        src="{% static 'mooc/image/course_hot.gif' %}"
+                                                        alt="living">热度高</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="_3V5rm">精品课</span>
+                                        {% endif %}
+                                    </span>
+                                                <img
+                                                        src="{{ MEDIA_URL }}{{ course.image }}" alt="course"></a></div>
+                                            <div class="_3D85p"><a href="{% url 'course:course_detail' course.id %}"
+                                                                   class="_1QDO8" title="{{ course.name }}"
+                                                                   target="_blank">{{ course.name }}</a>
+                                                <div class="_3P_yh"><span
+                                                        class="_1p7IR">观看人数：<em>{{ course.students }}</em></span>
+                                                    {% if course.is_free == 0 %}
+                                                        <span
+                                                                class="_2aIsc">免费</span>
+                                                    {% else %}
+                                                        <span
+                                                                class="_1PcnY"> ￥{{ course.price }}元</span>
+                                                    {% endif %}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                                <div style="width: 222px;"></div>
+                                <div style="width: 222px;"></div>
+                                <div style="width: 222px;"></div>
+                                <div style="width: 222px;"></div>
+                                <div style="width: 222px;"></div>
+                            </div>
+                            <div class="_2Ukh-">
+                                <div class="XsmQU">
+                                    <div class="_3332J aitemDisatble aitemFirst">首页</div>
+                                    <ul class="ant-pagination " unselectable="unselectable">
+
+                                        {% if all_courses.has_previous %}
+                                            <li title="Previous Page"
+                                                class="ant-pagination-disabled ant-pagination-prev"
+                                                aria-disabled="true"><a
+                                                    href="?{{ all_courses.previous_page_number.querystring }}"
+                                                    class="ant-pagination-item-link"><i
+                                                    class="anticon anticon-left">
+                                                <svg viewBox="64 64 896 896" class="" data-icon="left" width="1em"
+                                                     height="1em"
+                                                     fill="currentColor" aria-hidden="true">
+                                                    <path d="M724 218.3V141c0-6.7-7.7-10.4-12.9-6.3L260.3 486.8a31.86 31.86 0 0 0 0 50.3l450.8 352.1c5.3 4.1 12.9.4 12.9-6.3v-77.3c0-4.9-2.3-9.6-6.1-12.6l-360-281 360-281.1c3.8-3 6.1-7.7 6.1-12.6z"></path>
+                                                </svg>
+                                            </i></a></li>
+                                        {% endif %}
+
+                                        {% for page in all_courses.pages %}
+                                            {% if page %}
+                                                {% ifequal page all_courses.number %}
+                                                    <li class="ant-pagination-item ant-pagination-item-active"><a
+                                                            href="?{{ page.querystring }}">{{ page }}</a></li>
+                                                {% else %}
+                                                    <li class="ant-pagination-item"><a href="?{{ page.querystring }}"
+                                                                                       class="page">{{ page }}</a></li>
+                                                {% endifequal %}
+                                            {% else %}
+                                                <li class="none"><a href="">...</a></li>
+                                            {% endif %}
+                                        {% endfor %}
+                                        {% if all_courses.has_next %}
+                                            <li title="Next Page" tabindex="0" class=" ant-pagination-next"
+                                                aria-disabled="false"><a class="ant-pagination-item-link"
+                                                                         href="?{{ all_courses.next_page_number.querystring }}"><i
+                                                    class="anticon anticon-right">
+                                                <svg viewBox="64 64 896 896" class="" data-icon="right" width="1em"
+                                                     height="1em"
+                                                     fill="currentColor" aria-hidden="true">
+                                                    <path d="M765.7 486.8L314.9 134.7A7.97 7.97 0 0 0 302 141v77.3c0 4.9 2.3 9.6 6.1 12.6l360 281.1-360 281.1c-3.9 3-6.1 7.7-6.1 12.6V883c0 6.7 7.7 10.4 12.9 6.3l450.8-352.1a31.96 31.96 0 0 0 0-50.4z"></path>
+                                                </svg>
+                                            </i></a></li>
+                                        {% endif %}
+
+                                        <li title="Next 5 Pages" tabindex="0"
+                                            class="ant-pagination-jump-next ant-pagination-jump-next-custom-icon"><a
+                                                class="ant-pagination-item-link">
+                                            <div class="ant-pagination-item-container"><i
+                                                    class="anticon anticon-double-right ant-pagination-item-link-icon">
+                                                <svg viewBox="64 64 896 896" class="" data-icon="double-right"
+                                                     width="1em"
+                                                     height="1em" fill="currentColor" aria-hidden="true">
+                                                    <path d="M533.2 492.3L277.9 166.1c-3-3.9-7.7-6.1-12.6-6.1H188c-6.7 0-10.4 7.7-6.3 12.9L447.1 512 181.7 851.1A7.98 7.98 0 0 0 188 864h77.3c4.9 0 9.6-2.3 12.6-6.1l255.3-326.1c9.1-11.7 9.1-27.9 0-39.5zm304 0L581.9 166.1c-3-3.9-7.7-6.1-12.6-6.1H492c-6.7 0-10.4 7.7-6.3 12.9L751.1 512 485.7 851.1A7.98 7.98 0 0 0 492 864h77.3c4.9 0 9.6-2.3 12.6-6.1l255.3-326.1c9.1-11.7 9.1-27.9 0-39.5z"></path>
+                                                </svg>
+                                            </i><span class="ant-pagination-item-ellipsis">•••</span></div>
+                                        </a></li>
+
+                                    </ul>
+                                    <div class="_3332J null">尾页</div>
+
+                                </div>
+                            </div>
+                        {% endif %}
+
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <footer class="_3LWKs">
+            <div class="w1200">
+                <div class="_3aJyk"><p class="_2DW2R"><a href="javascript:;"><img
+                        src="{% static 'mooc/image/footer_subwb.png' %}" alt="关注微博"><img
+                        src="{% static 'mooc/image/footer_qrwb.jpg' %}"
+                        alt="大图" class="_2zzbZ"></a><a href="javascript:;"><img
+                        src="{% static 'mooc/image/footer_subwx.png' %}" alt="关注微信"><img
+                        src="{% static 'mooc/image/footer_qrwx.jpg' %}"
+                        alt="大图" class="_2zzbZ"></a></p><img
+                        src="{% static 'mooc/image/footer_phone.png' %}" alt="联系方式"></div>
+                <div class="yd8x8">
+                    <div class="_2LU72">
+                        <div class="_3qvba">
+                            <div class="_3NmFM"><a target="_blank" rel="noopener noreferrer" href="http://www.miitbeian.gov.cn">备案号：{{ company.ICP_REC }}</a>
+                                <a target="_blank" rel="noopener noreferrer" href="#">公网安备{{ company.SECURITY_REC }}</a>
+                                <a href="#" target="_blank" rel="noopener noreferrer" title="行业认证">
+                                    <img height="15" src="{% static 'mooc/image/footer_hyrz.png' %}" alt="lm"></a></div>
+                            <p>Copyright © 2019 {{ company.SITE }}-{{ company.COMPANY }} 版权所有</p></div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+<div>
+    <div class="_3k0ae loginMask">
+        <div class="_2cBAf loginIframeContainer" id="LOGIN_DIALOG">
+            <div class="loadingBox" style="width: 100%; height: 100%; position: relative;">
+                <iframe class="" src="" frameborder="0" width="376px" height="462px" id="LOGIN_FRAME"
+                        style="border-radius: 5px; display: block;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

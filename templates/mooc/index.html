@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh">
+{% load staticfiles %}
+<head>
+    <meta charset="UTF-8">
+    <title>{{ company.SITE }}-{{ company.COMPANY }}</title>
+    <link href="{% static 'mooc/css/index.css' %}" rel="stylesheet">
+    <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+    <script src="{% static 'mooc/js/index.js' %}"></script>
+    <script>
+        $(function(){
+            {% if request.user.is_authenticated %}
+            {% else %}
+                setTimeout('$("._3mYds a:first-child").click()',1500);
+            {% endif %}
+        })
+    </script>
+</head>
+<body>
+
+<div id="root">
+    <div id="reactRoot" style="background: rgb(255, 255, 255);">
+
+        <header class="_2hOPf" style="background-image: none;">
+            <nav class="_11XaA w1200">
+                <div class="_3x3PG">
+                    <a style="background-image: url({% static 'mooc/image/home_header_logo.png' %});">logo</a>
+                </div>
+                <div class="M3gZX">
+                    <div class="wzBJ6">
+                        <input maxlength="20" type="text" placeholder="搜索课程关键词" value="">
+                        <a href="javascript:;">搜索</a>
+                    </div>
+                    <div class="W-BrV">
+                        <a href="javascript:;" style="color: rgb(51, 51, 51);">java</a><a href="javascript:;"
+                                                                                          style="color: rgb(51, 51, 51);">UI设计</a><a
+                            href="javascript:;" style="color: rgb(51, 51, 51);">自媒体</a><a href="javascript:;"
+                                                                                          style="color: rgb(51, 51, 51);">蔬菜种植</a><a
+                            href="javascript:;" style="color: rgb(51, 51, 51);">车身</a><a href="javascript:;"
+                                                                                         style="color: rgb(51, 51, 51);">发动机</a>
+                    </div>
+                    <a href="#" class="_1Psl7"><img src="{% static 'mooc/image/home_header_r.png' %}" alt="多平台适配"></a>
+                </div>
+                <div class="MZyZ2">
+                    {% if request.user.is_authenticated %}
+                        <div class="_1bEof"><span class="_3iQZm ant-badge"><div class="_3cI36"></div></span>
+                            <div class="_1aqJh"><a href="{% url 'users:user_info' %}">
+                                {% if request.user.image != '' %}
+                                    <img title="{{ request.user.nick_name }}"
+                                         src="{{ MEDIA_URL }}{{ request.user.image }}"
+                                         alt="头像" style="position: relative;">
+                                {% else %}
+                                    <img title="{{ request.user.nickname }}"
+                                         src="{{ MEDIA_URL }}image/users/home_default_header.png"
+                                         alt="头像" style="position: relative;">
+                                {% endif %}
+                            </a>
+                                <div class="_2v85p"><em class="member-box"></em>
+                                    <ul>
+                                        <li><a href="#" style="display: none;">我的授课</a></li>
+                                        <li><a href="{% url 'users:mycourse' %}">学习课程</a></li>
+                                        <li><a href="{% url 'users:user_info' %}">个人信息</a></li>
+                                        <li><a href="{% url 'logout' %}">退出登录</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            {% if request.user.nick_name != '' %}
+                                <span class="_3Au-A userNickname"
+                                      title="{{ request.user.nick_name|slice:"5" }}">{{ request.user.nick_name|slice:"5" }}</span>
+                            {% else %}
+                                <span class="_3Au-A userNickname"
+                                      title="{{ request.user.username|slice:"5" }}">{{ request.user.username|slice:"5" }}</span>
+                            {% endif %}
+                            <div></div>
+                        </div>
+                    {% else %}
+                        <div class="_3mYds" style="color: rgb(51, 51, 51);">
+                            <a href="javascript:;" style="color: rgb(51, 51, 51);" data-url="{% url 'login' %}">
+                                <div>登录</div>
+                            </a>|<a href="javascript:;" style="color: rgb(51, 51, 51);" data-url="{% url 'register' %}">
+                            <div>注册</div>
+                        </a>
+                        </div>
+                    {% endif %}
+
+                </div>
+            </nav>
+        </header>
+        <div style="margin-top:-50px;">
+            <div class="_1Y8Nr">
+                <div class="_1tTGQ">
+                    <img src="{% static 'mooc/image/home_category.png' %}"
+                         alt="ico" class="_3xj-b">
+                    课程分类
+                </div>
+                <ul class="_2A3mY">
+                    <li><a href="/">首页</a></li>
+                    <li><a href="{% url 'course:course_list' %}">全部课程</a></li>
+                    <li class="_1eKLM"><img src="{% static 'mooc/image/home_header_phone.png' %}"
+                                            alt="tel"></li>
+                </ul>
+            </div>
+            <div class="_1Zcg9">
+                <div class="_2u4ro">
+                    <div class="_3IzSP">
+                        <div class="_3CImi">
+                            <div class="slick-slider slick-initialized" dir="ltr">
+                                <div class="slick-arrow slick-prev SZR9I" title="上一个"
+                                     style="display: block; left: 50%; transform: translateX(-376px); background-image: url({% static 'mooc/image/home_banner_prev.png' %});">
+                                </div>
+                                <div class="slick-list">
+                                    <div class="slick-track"
+                                         style="width: 24206px; opacity: 1; transform: translate3d(0px, 0px, 0px);">
+                                        {% for banner in all_banners %}
+                                            <div class="slick-slide  slick-active slick-current" tabindex="-1"
+                                                 aria-hidden="false"
+                                                 style="outline: none; width: 1274px;">
+                                                <div>
+                                                    <div tabindex="-1" style="width: 100%; display: inline-block;"><a
+                                                            class="liLji"
+                                                            href="{{ banner.url }}"
+                                                            title="{{ banner.title }}"
+                                                            style="background: url(
+                                                                    {{ MEDIA_URL }}{{ banner.image }}) center center no-repeat;">banner</a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="slick-arrow slick-next SZR9I" title="下一个"
+                                     style="display: block; right: 50%; transform: translateX(348px); background-image: url({% static 'mooc/image/home_banner_next.png' %});">
+                                </div>
+                                <div class="slick-dots" style="padding: 10px; margin-bottom: 20px;">
+                                    <ul class="jK3Pt">
+                                        <li class="slick-active">
+                                            <button>1</button>
+                                        </li>
+                                        <li class="">
+                                            <button>2</button>
+                                        </li>
+                                        <li class="">
+                                            <button>3</button>
+                                        </li>
+                                        <li class="">
+                                            <button>4</button>
+                                        </li>
+                                        <li class="">
+                                            <button>5</button>
+                                        </li>
+                                        <li class="">
+                                            <button>6</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="_3FCOV">
+                            <div class="_3OyQP">
+                                <div class="_1T6u4">
+                                    <ul class="_3VRn3">
+                                        {% for root_category_nav in root_category %}
+                                            <li><a target="_blank"
+                                                   href="{% url 'course:course_list' %}?category={{ root_category_nav.id }}"
+                                                   class=""><i
+                                                    class="meun-it"><img
+                                                    src="{% static 'mooc/image/home_category__prev.png' %}"
+                                                    alt="{{ root_category_nav.desc }}"></i>{{ root_category_nav.name }}
+                                            </a></li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% for sub_category1 in root_category %}
+                                        <ul class="_1t3zk" style="display:none;">
+                                            {% for sub_category2 in sub_category1.category_set.get_queryset %}
+                                                <li><a target="_blank" class="_3r_wT"
+                                                       href="{% url 'course:course_list' %}?category={{ sub_category2.id }}">{{ sub_category2 }}</a>
+                                                    <div class="txcRu">
+                                                        {% for sub_category3 in sub_category2.category_set.get_queryset %}
+                                                            <a href="{% url 'course:course_list' %}?category={{ sub_category3.id }}"
+                                                               target="_blank">{{ sub_category3.name }}</a>
+                                                        {% endfor %}
+                                                    </div>
+                                                </li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="_3vDNU">
+                                <div class="banner-loginNo">
+                                    <div class="_1iNnD">
+                                        {% if request.user.is_authenticated %}
+                                            <a href="{% url 'users:user_info' %}">
+                                                {% if request.user.image != '' %}
+                                                    <img
+                                                            src="{{ MEDIA_URL }}{{ request.user.image }}"
+                                                            alt="avatar">
+                                                {% else %}
+                                                    <img
+                                                            src="{{ MEDIA_URL }}image/users/home_default_header.png"
+                                                            alt="avatar">
+                                                {% endif %}
+                                            </a>
+                                        {% else %}
+                                            <a href="#"> <img
+                                                    src="{{ MEDIA_URL }}image/users/home_default_header.png"
+                                                    alt="avatar"></a>
+                                        {% endif %}
+                                        <p class="welcome">欢迎来到{{ company.SITE }}</p></div>
+                                    {% if request.user.is_authenticated %}
+                                        <div class="_1jUYq"><a href="{% url 'users:mycourse' %}"><span
+                                                class="HHjEo">{{ usercourse_count }}</span><span>课程</span></a><a
+                                                href="{% url 'users:myfav_course' %}"><span
+                                                class="HHjEo">{{ userfavcourse_count }} </span><span>收藏</span></a></div>
+                                    {% else %}
+                                        <div class="_3CBfq"><a href="javascript:;" class="Mb0wI O8KBD"
+                                                               data-url="{% url 'register' %}">
+                                            <div>注册</div>
+                                        </a><a href="javascript:;" class="_320Oc O8KBD" data-url="{% url 'login' %}">
+                                            <div>登录</div>
+                                        </a></div>
+                                    {% endif %}
+
+                                    <div class="_3JzBR"><a href="{% url 'course:course_list' %}"><img
+                                            src="{% static 'mooc/image/home_add_course.jpg' %}" alt="chose course"></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="gv-1J">
+                <div class="w1200" style="padding-top:30px;">
+                    {% for root_category_content in root_category %}
+                        <div class="_1ve4G">
+                            <div class="AxdgC"><h3 class="_3_MpJ">{{ root_category_content.name }}</h3>
+                                <ul class="_3EjZO">
+                                    <li><a href="{% url 'course:course_list' %}?category={{ root_category_content.id }}"
+                                           class="nGLyz">更多</a></li>
+                                </ul>
+                            </div>
+                            <div class="_1mypO">
+                                {% for course in root_category_content.get_category_content %}
+                                    <div class="_2zxiF">
+                                        <div class="nT5B0"><a href="{% url 'course:course_detail' course.id %}"
+                                                              class="_2_Y2j" target="_blank"><span
+                                                class="Iopmm"></span><span class="fsg-Q">
+                                    {% if course.is_free == 0 %}
+                                        {% if course.students < 1000 %}
+                                        {% else %}
+                                            <span class="BjfNz"><img
+                                                    src="{% static 'mooc/image/course_hot.gif' %}" alt="living">热度高</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span
+                                                class="_3mTDF">精品课</span>
+                                    {% endif %}
+                                </span>
+                                            <img
+                                                    src="{{ MEDIA_URL }}{{ course.image }}"
+                                                    alt="course"></a></div>
+                                        <div class="_3tnio"><a href="{% url 'course:course_detail' course.id %}"
+                                                               class="_1AK4M"
+                                                               title="{{ course.name }}"
+                                                               target="_blank">{{ course.name }}</a>
+                                            <div class="_1wjxb"><span class="_36YtQ">观看人数：<em>{{ course.students }}</em></span><span
+                                                    class="_1O23J">
+                                        {% if course.is_free == 0 %}
+                                            免费
+                                        {% else %}
+                                            ￥{{ course.price }}元
+                                        {% endif %}
+                                        </span></div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="w1200 _3dS8M">
+                <dl>
+                    <dt>友情链接</dt>
+                    <dd>
+                        <a target="_blank" rel="noopener noreferrer" href="#">{{ company.SITE }}</a>
+                        <a target="_blank" rel="noopener noreferrer" href="http://www.qq.com/">腾讯</a>
+                        <a target="_blank" rel="noopener noreferrer" href="http://www.baidu.com/">百度</a>
+                        <a target="_blank" rel="noopener noreferrer" href="https://www.360.cn/">360安全</a>
+                    </dd>
+                </dl>
+            </div>
+            <div class="_3GquT" style="right: 0px;">
+                <ul class="_2GE1J">
+                    <li><a href="javascript:;" class="_3kWa_">关注微信
+                        <div class="_2rWia undefined"><img
+                                src="{% static 'mooc/image/home_right_qrwo.jpg' %}"
+                                width="184" alt="关注微信公众号">
+                            <p>关注{{ company.SITE }}</p>
+                            <p>官方公众号</p></div>
+                    </a></li>
+                    <li class="_1rbAc" style="display: none;"><a href="javascript:;" class="jJDdf">返回顶部</a></li>
+                </ul>
+            </div>
+        </div>
+        <footer class="_2d4xJ">
+            <div class="w1200">
+                <div class="_2hbMU"><img
+                        src="{% static 'mooc/image/home_footer_phone.png' %}" alt="联系方式">
+                    <p class="_3q8s2"><a href="javascript:;"><img
+                            src="{% static 'mooc/image/home_footer_subwb.jpg' %}"
+                            alt="关注微博"><img
+                            src="{% static 'mooc/image/footer_qrwb.jpg' %}"
+                            alt="大图" class="_1QdCh"></a><a href="javascript:;"><img
+                            src="{% static 'mooc/image/home_footer_subwx.jpg' %}"
+                            alt="关注微信"><img
+                            src=".{% static 'mooc//image/footer_qrwx.jpg' %}"
+                            alt=" 大图" class="_1QdCh"></a></p></div>
+                <div class="_1ws0z">
+                    <div><img src="{% static 'mooc/image/home_footer_qrkf.jpg' %}" alt="">
+                        <p>扫码添加客服微信</p></div>
+                    <div><img src="{% static 'mooc/image/home_footer_qrwx.jpg' %}" alt="">
+                        <p>关注{{ company.SITE }}公众号</p></div>
+                </div>
+                <div class="_1HMOW"><img
+                        src="{% static 'mooc/image/home_footer_logo.png' %}"
+                        alt="底部logo">
+                    <div class="sERRf">
+                        <div class="_2CKEW">
+                            <div class="_2Em7i"><a target="_blank" rel="noopener noreferrer" href="http://www.miitbeian.gov.cn">备案号：{{ company.ICP_REC }}</a>
+                                <a target="_blank" rel="noopener noreferrer" href="#">公网安备{{ company.SECURITY_REC }}</a>
+                                <a href="#" target="_blank" rel="noopener noreferrer" title="行业认证">
+                                <img height="15" src="{% static 'mooc/image/footer_hyrz.png' %}" alt="lm"></a></div>
+                            <p>Copyright © 2019 {{ company.SITE }}-{{ company.COMPANY }} 版权所有</p></div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<div>
+    <div class="_3k0ae loginMask">
+        <div class="_2cBAf loginIframeContainer" id="LOGIN_DIALOG">
+            <div class="loadingBox" style="width: 100%; height: 100%; position: relative;">
+                <iframe class="" src="" frameborder="0" width="376px" height="498px" id="LOGIN_FRAME"
+                        style="border-radius: 5px; display: block;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

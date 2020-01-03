@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+<head>
+    <meta charset="UTF-8">
+    <title>{{ video.name }}-{{ company.SITE }}</title>
+    <link href="{% static 'mooc/css/video.css' %}" rel="stylesheet">
+    <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+    <script src="{% static 'mooc/js/video.js' %}"></script>
+
+    <script>
+        $(function () {
+            //share action
+            $(".shareTxt___2d2Q6 div ul li").click(function () {
+                if ($(this).index() == 0) {
+                    window.open("http://connect.qq.com/widget/shareqq/index.html?url=" + window.location.href + "&title=" + "{{ course.name }}" + "&pics=" + "{{ course.image }}" + "&summary={{ company.SITE  }}-{{ company.COMPANY }}");
+                } else if ($(this).index() == 1) {
+                    window.open("http://qr.liantu.com/api.php?text=" + window.location.href);
+                } else if ($(this).index() == 2) {
+                    window.open("http://service.weibo.com/share/share.php?url=" + window.location.href + "&sharesource=weibo&title=" + "{{ course.name }}" + "&pic=" + "{{ course.image }}" + "&appkey=1111111111111111111");
+                } else if ($(this).index() == 3) {
+                    window.open("https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=" + window.location.href + "&sharesource=qzone&title=" + "{{ course.name }}" + "&pics=" + "{{ course.image }}" + "&summary={{ company.SITE  }}-{{ company.COMPANY }}");
+                } else {
+                    return;
+                }
+            });
+
+
+            //show comment page
+            $(".course_comment .creat___1DJts").click(function () {
+
+                $("#course_comment .rc-dialog-mask").removeClass("rc-dialog-mask-hidden")
+                $("#course_comment .rc-dialog-wrap").css("display", "block");
+            })
+            //close comment page
+            $("#course_comment .rc-dialog-close-x").click(function () {
+                $("#course_comment .rc-dialog-mask").addClass("rc-dialog-mask-hidden")
+                $("#course_comment .rc-dialog-wrap").css("display", "none");
+            })
+            //submit comment
+            $("#course_comment .rc-dialog-footer a").click(function () {
+                content = $("#course_comment .dJSV5").val();
+                course_id =
+                {{ course.id }}
+                if (content == '') {
+                    alert("评论内容不能为空");
+                    return false;
+                }
+                if (content.length > 200) {
+                    alert("评论内容不能超过200个字")
+                    return false;
+                }
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'operation:user_comment' %}",
+                    data: {
+                        "comment_id": course_id,
+                        "comment_type": 1,
+                        "content": content
+                    },
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.Code == 0) {
+                            alert(data.Msg);
+                            $("#course_comment .rc-dialog-close-x").click();
+                            $("#course_comment .dJSV5").val('');
+                        }
+                        if (data.Code == 1) {
+                            alert(data.Msg);
+                        }
+                    },
+                });
+            })
+            $("#videoid")[0]['disablePictureInPicture'] = true;
+        })
+    </script>
+</head>
+<body>
+<div id="root">
+    <div>
+        <div class="header___1UdUE">
+            <div class="head___UQbDK">
+                <div class="logo___2XWcn"><a href="/"><img
+                        src="{% static 'mooc/image/header_logo.png' %}" alt="全部课程logo"></a></div>
+                <div class="headList___11kOi"><a href=" /">首页</a><a href="{% url 'course:course_list' %}">全部课程</a><a
+                        href="#" style="display: none;">待定菜单</a></div>
+                <div class="headSearch___1jujj"><input maxlength="20" type="text" placeholder="搜索课程关键词" value=""><a
+                        href="javascript:;">搜索</a></div>
+                <div class="acSitu___20c2D">
+                    <div class="loginSuccess___1zABO">
+                        <div class="memberMenu___14GUG"><a href="{% url 'users:user_info' %}">
+                            {% if request.user.image != '' %}
+                                <img title="{{ request.user.nick_name }}"
+                                     src="{{ MEDIA_URL }}{{ request.user.image }}"
+                                     alt="头像" style="position: relative;">
+                            {% else %}
+                                <img title="{{ request.user.nickname }}"
+                                     src="{{ MEDIA_URL }}image/users/home_default_header.png"
+                                     alt="头像" style="position: relative;">
+
+                            {% endif %}
+                        </a>
+                            <div class="memberHome___ReVBw"><em class="member-box"></em>
+                                <ul>
+                                    <li style="display: none;"><a href="#">我的授课</a></li>
+                                    <li><a href="{% url 'users:mycourse' %}">学习课程</a></li>
+                                    <li><a href="{% url 'users:user_info' %}">个人信息</a></li>
+                                    <li><a href="{% url 'logout' %}">退出登录</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        {% if request.user.nick_name != '' %}
+                            <span class="avatarNick___3PfCp-A userNickname"
+                                  title="{{ request.user.nick_name }}">{{ request.user.nick_name }}</span>
+                        {% else %}
+                            <span class="avatarNick___3PfCp-A userNickname"
+                                  title="{{ request.user.username }}">{{ request.user.username }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div style="height: calc(100vh - 60px);">
+                <div class="mainbody___15UNZ">
+                    <div class="webMiddle___2pfni">
+                        <div class="video___2VMvX">
+                            <div id="vtitle" style="">{{ video.name }}</div>
+                                <video id="videoid" src="{{ video.url }}" type="video/mp4" controls="controls"
+                                       autoplay="autoplay" height="100%" width="100%"
+                                       controlslist="nodownload noremoteplayback">
+                                </video>
+                            <div class="list_control">></div>
+                        </div>
+                        <div>
+                            <div class="scoretips___12G0x" style="display: none;">
+                                <div><i aria-label="icon: close" tabindex="-1" class="anticon anticon-close">
+                                    <svg viewBox="64 64 896 896" focusable="false" class="" data-icon="close"
+                                         width="1em"
+                                         height="1em" fill="currentColor" aria-hidden="true">
+                                        <path d="M563.8 512l262.5-312.9c4.4-5.2.7-13.1-6.1-13.1h-79.8c-4.7 0-9.2 2.1-12.3 5.7L511.6 449.8 295.1 191.7c-3-3.6-7.5-5.7-12.3-5.7H203c-6.8 0-10.5 7.9-6.1 13.1L459.4 512 196.9 824.9A7.95 7.95 0 0 0 203 838h79.8c4.7 0 9.2-2.1 12.3-5.7l216.5-258.1 216.5 258.1c3 3.6 7.5 5.7 12.3 5.7h79.8c6.8 0 10.5-7.9 6.1-13.1L563.8 512z"></path>
+                                    </svg>
+                                </i>上课满意吗
+                                    <div>去评分</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="Box___3cKpm"><img class="lf___3XQni"
+                                                      src="{{ MEDIA_URL }}{{ teacher.image }}"
+                                                      alt="courseImg">
+                            <div class="text___yBs5_ lf___3XQni"><h3 class="ell___2mdWK">当前章节:{{ video.lesson }}</h3><h4
+                                    class="ell___2mdWK">所属课程:{{ course.name }} </h4><h4
+                                    class="ell___2mdWK">课程老师:{{ teacher.name }} </h4></div>
+                            <div class="addmore___2jBNN rf___1rjMk">
+                                <div class="addmorebottom___2A0h3">
+
+                                    <div class="phone___VN_bK rf___1rjMk course_comment">
+                                        <div class="hoverBlock___3tfPR"></div>
+                                        <span class="creat___1DJts"><span><i class="ico"></i></span>课程评论</span>
+                                    </div>
+                                    <div class="share___ZW7OU rf___1rjMk"><span class="creat___1DJts"><span><i
+                                            class="ico"></i></span>分享</span>
+                                        <div class="hoverBlock___3tfPR"></div>
+                                        <div class="ashare___Wbi5c">
+                                            <div class="shareHover___oYUog">
+                                                <div class="shareTxt___2d2Q6">
+                                                    <div>
+                                                        <ul>
+                                                            <li style="background-position: -305px -16px;"></li>
+                                                            <li style="background-position: -305px -64px;"></li>
+                                                            <li style="background-position: -305px -112px;"></li>
+                                                            <li style="background-position: -305px -161px;"></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="message___uMMEj rf___1rjMk"><span class="creat___1DJts"><span><i
+                                            class="ico"></i></span>课程关注</span>
+                                        <div class="hoverBlock___3tfPR"><img
+                                                src="{% static 'mooc/image/footer_qrwx.jpg' %}">
+                                            <p>关注{{ company.SITE }}公众号</p>
+                                            <p>更新提醒早知道</p></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="right___3lxEQ">
+                        <div class="videoright___3a2QS">
+                            <div>
+                                <div><span>目录</span></div>
+                                <div class="catalog___1T9jo">
+                                    <ul class="clearfix___1YZtO">
+                                        {% for lesson in course.lesson_set.get_queryset %}
+                                            <li class="active1___3zVI5"><p class="ell___1n-ZG">{{ lesson.name }} </p>
+                                                <div class="clearfixhidden___2gYJj">
+                                                    {% for video in lesson.video_set.get_queryset %}
+                                                        <div class="playbackVideo___3TjXW" data-url="{{ video.id }}"><p
+                                                                class="ell___1n-ZG">
+                                                            <em></em>&nbsp;<span
+                                                                class="ell___1n-ZG"
+                                                                style="float: left; width: 230px;">{{ video.name }}</span>
+                                                        </p><span
+                                                                class="videotimespan___2BqKB">{{ video.learn_times }}</span><i></i>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<div class="player-tips">
+    <div>Version：v0.1.1</div>
+    <div><a href="#">{{ company.SITE }}</a></div>
+</div>
+<div id="course_comment">
+    <div>
+        <div class="rc-dialog-mask rc-dialog-mask-hidden"></div>
+        <div tabindex="-1" class="rc-dialog-wrap " role="dialog" aria-labelledby="rcDialogTitle0"
+             style="display: none;">
+            <div role="document" class="rc-dialog ">
+                <div tabindex="0" style="width: 0px; height: 0px; overflow: hidden;">sentinelStart</div>
+                <div class="rc-dialog-content">
+                    <button aria-label="Close" class="rc-dialog-close"><span class="rc-dialog-close-x"></span></button>
+                    <div class="rc-dialog-header">
+                        <div class="rc-dialog-title" id="rcDialogTitle0">课程有什么不懂和疑惑的地方，那就大胆向老师和同学们提出来吧！</div>
+                    </div>
+                    <div class="rc-dialog-body">
+                        <div class="KTbXb">
+                            <dl>
+                                <dt>内容：</dt>
+                                <dd><textarea class="dJSV5" maxlength="200"></textarea></dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="rc-dialog-footer"><a href="javascript:;" class="lHwyw">提交评论</a></div>
+                </div>
+                <div tabindex="0" style="width: 0px; height: 0px; overflow: hidden;">sentinelEnd</div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

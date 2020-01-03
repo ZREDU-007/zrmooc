@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+<head>
+    <meta charset="UTF-8">
+    <title>注册-{{ company.SITE }}</title>
+    <link href="{% static 'mooc/css/index.css' %}" rel="stylesheet">
+    <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+    <script src="{% static 'mooc/js/common.js' %}"></script>
+    <script>
+        $(function () {
+            //click close button to close register page
+            $(".registerpondx___e-_hU").click(function () {
+                $("#LOGIN_FRAME", window.parent.document).attr("height", "470px")
+                $(".loginMask", window.parent.document).css("display", "none");
+                $(".loginIframeContainer", window.parent.document).css("display", "none")
+            })
+
+            //click have account to login
+            $(".tologin___tjbmg").click(function () {
+                $("#LOGIN_FRAME", window.parent.document).attr("height", "498px")
+                $("#LOGIN_FRAME", window.parent.document).attr("src", $(this).attr("data-url"));
+            })
+        })
+    </script>
+</head>
+<body>
+<div id="root">
+    <div class="loginPop___1CsFh" version="3.3.4">
+        <div class="registerpond___1q9qx">
+            <div class="logintitle___1n8XU">
+                <div>注册</div>
+                <div class="registerpondx___e-_hU"><img src="{% static 'mooc/image/x-black.png' %}"
+                                                        alt=""></div>
+            </div>
+            <div class="resister-popup-win bind-phone-child-wind">
+                <div class="div-register"><h2>Hi，欢迎加入{{ company.SITE }}</h2>
+                    <div style="position: relative;">
+                        <div class="acctypes___qX07U acctype"><input type="number" class="atin w236" maxlength="11"
+                                                                     placeholder="请输入邮箱">
+                            <div class="acctypesUl___3GAUS acctype-ul "></div>
+                        </div>
+                        <ul class="zoneCodeList___2rmEz"></ul>
+                        <div class="acctypeP___2ZcED acctype"><input type="number" class="atin w125" maxlength="4"
+                                                                     placeholder="请输入邮箱验证码">
+                            <div class="acode___2GnLT fl">获取验证码</div>
+                        </div>
+                    </div>
+                    <div class="registerPondInp___1TE_M"><input type="password" placeholder="设置密码" maxlength="15"
+                                                                class="register-pond-inp3 register-phone-pwd"
+                                                                autocomplete="off"></div>
+                    <p>长度6-15位的密码</p>
+                    <div class="register-error none"><span>邮箱错误，请重新输入</span></div>
+                </div>
+            </div>
+            <button class="registerPondbtn___23IyY">确定</button>
+            <a class="tologin___tjbmg" data-url="{% url 'login' %}">已有帐号？请登录</a></div>
+    </div>
+</div>
+
+</body>
+</html>

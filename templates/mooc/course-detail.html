@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh">
+{% load staticfiles %}
+{% load extra_tags %}
+<head>
+    <meta charset="UTF-8">
+    <title>{{ course.name }}-{{ company.SITE }}</title>
+    <link href="{% static 'mooc/css/course-detail.css' %}" rel="stylesheet">
+    <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+    <script src="{% static 'mooc/js/course-detail.js' %}"></script>
+    <script>
+        $(function () {
+            //start study button action to continue study
+            $(".start_study").click(function () {
+
+                //relate user study
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'operation:user_study' %}",
+                    data: {
+                        "study_id": {{ course.id }},
+                        "study_type": 1,
+                        "operation": 'add'
+                    },
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (localStorage.getItem("video_show_id") != '' && localStorage.getItem("video_show_id") != null) {
+                            //get display chapter_show_id & video_show_id
+                            chapter_show_id = localStorage.getItem("chapter_show_id");
+                            video_show_id = localStorage.getItem("video_show_id");
+                            //use chapter_show_id & video_show_id to find video_id
+                            video_id = $(".swtS9 li ul").eq(chapter_show_id).find("li").eq(video_show_id).find("span").attr("data-id");
+                            //continue video content
+                            if (video_id != undefined) {
+                                window.location.href = "http://" + window.location.host + "/course/video/" + video_id;
+                            } else {
+                                $(".tipMask").css("display", "block");
+                                $(".tipContainer").text("当前课程下没有视频！");
+                                setInterval('$(".tipMask").css("display", "none")', 1500);
+                            }
+
+                        } else {
+                            //start video content
+                            window.location.href = "http://" + window.location.host + $("._2qi1f li:first a").attr("href");
+                        }
+                    },
+                });
+            });
+            //set chapter & video args to control play page's playlist
+            $(".swtS9>li>ul>li").click(function () {
+                //relate user and course
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'operation:user_study' %}",
+                    data: {
+                        "study_id": {{ course.id }},
+                        "study_type": 1,
+                        "operation": 'add'
+                    },
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (localStorage.getItem("video_show_id") != '' && localStorage.getItem("video_show_id") != null) {
+                            localStorage.setItem("chapter_show_id", ($(this).parent().index() - 1) / 2);
+                            localStorage.setItem("video_show_id", $(this).index());
+                        } else {
+                            //start video content
+                            window.location.href = "http://" + window.location.host + $("._2qi1f li:first a").attr("href");
+                        }
+                    },
+                });
+            });
+            //share action
+            $("._3N5TO ul li").click(function () {
+                if ($(this).index() == 0) {
+                    window.open("http://connect.qq.com/widget/shareqq/index.html?url=" + window.location.href + "&title=" + "{{ course.name }}" + "&pics=" + "{{ course.image }}" + "&summary={{ company.SITE  }}-{{ company.COMPANY }}");
+                } else if ($(this).index() == 1) {
+                    window.open("https://sns.qzone.qq.com/cgi-bin/qzshare/cgi_qzshare_onekey?url=" + window.location.href + "&sharesource=qzone&title=" + "{{ course.name }}" + "&pics=" + "{{ course.image }}" + "&summary={{ company.SITE  }}-{{ company.COMPANY }}");
+                } else if ($(this).index() == 2) {
+                    window.open("http://service.weibo.com/share/share.php?url=" + window.location.href + "&sharesource=weibo&title=" + "{{ course.name }}" + "&pic=" + "{{ course.image }}" + "&appkey=1111111111111111111");
+                } else if ($(this).index() == 3) {
+                    window.open("http://qr.liantu.com/api.php?text=" + window.location.href);
+                } else {
+                    return;
+                }
+            });
+
+            //fav course
+            $("._1k2FE p span:last-child").click(function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'operation:user_favorite' %}",
+                    data: {'fav_id': {{ course.id }}, 'fav_type': 1},
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.Code == 1000) {
+                            if (data.Msg == '用户未登录') {
+                                window.location.href = "/login/";
+                            } else {
+                                alert(data.Msg);
+                            }
+                        } else {
+                            if (data.Code == 0) {
+                                $("._1k2FE p span:last-child").text("已收藏")
+                                $("._1k2FE p span:first-child em").text(Number($("._1k2FE p span:first-child em").text()) + 1)
+                                alert(data.Msg);
+                            } else if (data.Code == 1) {
+                                $("._1k2FE p span:last-child").text("收藏课程");
+                                $("._1k2FE p span:first-child em").text(Number($("._1k2FE p span:first-child em").text()) - 1)
+                                alert(data.Msg);
+                            }
+                        }
+                    },
+                });
+            })
+
+            //subcribe teacher
+            $("._2yY9a:first img").hover(function () {
+                $("._2yY9a .subcribe").css("display", "block");
+            }, function () {
+
+            })
+            $("._2yY9a .subcribe").hover(function () {
+
+            }, function () {
+                $("._2yY9a .subcribe").css("display", "none");
+            })
+            $(".subcribe").click(function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'operation:user_favorite' %}",
+                    data: {'fav_id': {{ teacher.id }}, 'fav_type': 4},
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.Code == 1000) {
+                            if (data.msg == '用户未登录') {
+                                window.location.href = "/login/";
+                            } else {
+                                alert(data.msg);
+                            }
+                        } else {
+                            if (data.Code == 0) {
+                                alert("已关注");
+                                $(".subcribe span").text("取消关注")
+                            } else if (data.Code == 1) {
+                                alert("已取消关注");
+                                $(".subcribe span").text("点击关注");
+                            }
+                        }
+                    },
+                });
+            })
+
+
+        })
+    </script>
+</head>
+<body>
+<div id="root">
+    <div id="reactRoot">
+        <div class="_3EVdm">
+            <div class="_3Ja6X">
+                <div class="_1LlpG"><a href="/"><img
+                        src="{% static 'mooc/image/header_logo.png' %}" alt="全部课程logo"></a></div>
+                <div class="_3HQec"><a href="/">首页</a><a href="{% url 'course:course_list' %}">全部课程</a><a href="#"
+                                                                                                          style="display: none;">待定菜单</a>
+                </div>
+                <div class="_3AT4J"><input maxlength="20" type="text" placeholder="搜索课程关键词" value=""><a
+                        href="javascript:;">搜索</a></div>
+                <div class="RZ1kP">
+                    {% if request.user.is_authenticated %}
+                        <div class="_1bEof"><span class="_3iQZm ant-badge"><div class="_3cI36"></div></span>
+                            <div class="_1aqJh"><a href="{% url 'users:user_info' %}">
+                                {% if request.user.image != '' %}
+                                    <img title="{{ request.user.nick_name }}"
+                                         src="{{ MEDIA_URL }}{{ request.user.image }}"
+                                         alt="头像" style="position: relative;">
+                                {% else %}
+                                    <img title="{{ request.user.nickname }}"
+                                         src="{{ MEDIA_URL }}image/users/home_default_header.png"
+                                         alt="头像" style="position: relative;">
+
+                                {% endif %}
+                            </a>
+                                <div class="_2v85p"><em class="member-box"></em>
+                                    <ul>
+                                        <li style="display: none;"><a href="#">我的授课</a></li>
+                                        <li><a href="{% url 'users:mycourse' %}">学习课程</a></li>
+                                        <li><a href="{% url 'users:user_info' %}">个人信息</a></li>
+                                        <li><a href="{% url 'logout' %}">退出登录</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            {% if request.user.nick_name != '' %}
+                                <span class="_3Au-A userNickname"
+                                      title="{{ request.user.nick_name }}">{{ request.user.nick_name }}</span>
+                            {% else %}
+                                <span class="_3Au-A userNickname"
+                                      title="{{ request.user.username }}">{{ request.user.username }}</span>
+                            {% endif %}
+                            <div></div>
+                        </div>
+                    {% else %}
+                        <div class="_3mYds" style="color: rgb(51, 51, 51);"><a href="javascript:;"
+                                                                               style="color: rgb(51, 51, 51);">
+                            <div>登录</div>
+                        </a>|<a href="javascript:;" style="color: rgb(51, 51, 51);">
+                            <div>注册</div>
+                        </a></div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div style="min-height: calc(100vh - 180px); background: rgb(248, 248, 248);">
+            <div style="background: rgb(248, 248, 248);">
+                <div class="Pi72o">
+
+                    <div class="_9eTAK"><a href="/">首页</a><span class="_1vOT1"> &gt; </span>
+                        {% for breacrumb in breadcrumbs %}
+                            <span><a
+                                    href="{% url 'course:course_list' %}?category={{ breacrumb.id }}">{{ breacrumb.name }}</a><span
+                                    class="_1vOT1"> &gt; </span></span>
+                        {% endfor %}
+                        <span>{{ course.name }}</span>
+                    </div>
+
+                    <div>
+                        <div class="ftkBa">
+                            <div class="_2BiBH"><img
+                                    src="{{ MEDIA_URL }}{{ course.image }}"
+                                    alt="{{ course.name }}"></div>
+                            <div class="_1y_HK"><h1>{{ course.name }}</h1>
+                                <div class="_3wtQg">
+                                <span><span class="_2ahs7">价 格：</span>
+
+                                        <span class="_2J4cA">免费 </span>
+
+                                    </span>
+                                    <a src="javascript:;"
+                                       class="_2qrKA"><i></i><span>分享</span>
+                                        <div>
+                                            <div class="_1UUPY"><i class="undefined _1uV7w"></i>
+                                                <div class="_3N5TO">
+                                                    <div>
+                                                        <ul>
+                                                            <li><img alt=""
+                                                                     src="{% static 'mooc/image/share_qq.png' %}"></li>
+                                                            <li><img alt=""
+                                                                     src="{% static 'mooc/image/share_qz.png' %}"></li>
+                                                            <li><img alt=""
+                                                                     src="{% static 'mooc/image/share_wb.png' %}"></li>
+                                                            <li><img alt=""
+                                                                     src="{% static 'mooc/image/share_wx.png' %}"></li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </a></div>
+                                <div class="_1f3__">
+                                    <div class="_3Ixy6">
+                                        <div class="_2TDWY">
+                                            <div class="_3jOun">浏览人数：</div>
+                                            <div class="_1zFwE">{{ course.click_nums }}人</div>
+                                        </div>
+                                        <div class="_2TDWY">
+                                            <div class="_3jOun">学习人数：</div>
+                                            <div class="_1zFwE">{{ course.students }}人</div>
+                                        </div>
+                                        <div class="_2TDWY">
+                                            <div class="_3jOun">课程时长：</div>
+                                            <div class="_1zFwE">{{ course.learn_times }}</div>
+                                        </div>
+                                        <div class="_2TDWY">
+                                            <div class="_3jOun">章节数目：</div>
+                                            <div class="_1zFwE">{{ course.get_zj_nums }}章</div>
+                                        </div>
+                                        <div class="_2TDWY">
+                                            <div class="_3jOun">课程难度：</div>
+                                            <div class="_1zFwE">
+                                                {% if course.degree == 'cj' %}
+                                                    初级
+                                                {% elif course.degree == 'zj' %}
+                                                    中级
+                                                {% elif course.degree == 'gj' %}
+                                                    高级
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="_2TDWY">
+                                            <div class="_3jOun">课程类别：</div>
+                                            <div class="_1zFwE">{{ course.category }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="_3_0BU"><span class="_2Z9Zf">学习用户：</span>
+                                        {% for course_user in course.id|get_course_learn_users %}
+                                            {% if course_user.image != '' %}
+                                                <img width="30" height="30"
+                                                     src="{{ MEDIA_URL }}{{ course_user.image }}"
+                                                     style="border-radius:50%;margin-top:-8px;margin-right: 3px;"/>
+
+                                            {% else %}
+                                                <img width="30" height="30"
+                                                     src="{{ MEDIA_URL }}image/users/home_default_header.png"
+                                                     style="border-radius:50%;margin-top:-8px;margin-right: 3px;"/>
+
+                                            {% endif %}
+                                        {% endfor %}</div>
+                                </div>
+
+                                    <div class="_33yvy"><a href="javaScript:;" class="_298q2 start_study">开始学习</a></div>
+                                <div class="_1k2FE"><p><span>已被 <em>{{ course_fav_nums }}</em>人收藏</span><span>
+                                    {% if has_fav_course == True %}
+                                        已收藏
+                                    {% else %}
+                                        收藏课程
+                                    {% endif %}
+                                </span>
+                                </p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="fIgOq">
+                        <div class="_2hNDO">
+                            <div class="rc-tabs rc-tabs-top">
+                                <div role="tablist" class="rc-tabs-bar _37HvY" tabindex="0">
+                                    <div class="rc-tabs-nav-container"><span unselectable="unselectable"
+                                                                             class="rc-tabs-tab-prev rc-tabs-tab-btn-disabled"><span
+                                            class="rc-tabs-tab-prev-icon"></span></span><span
+                                            unselectable="unselectable"
+                                            class="rc-tabs-tab-next rc-tabs-tab-btn-disabled"><span
+                                            class="rc-tabs-tab-next-icon"></span></span>
+                                        <div class="rc-tabs-nav-wrap">
+                                            <div class="rc-tabs-nav-scroll">
+                                                <div class="rc-tabs-nav rc-tabs-nav-animated">
+                                                    <div>
+                                                        <div role="tab" aria-disabled="false" aria-selected="true"
+                                                             class=" rc-tabs-tab rc-tabs-tab-active">课程介绍
+                                                        </div>
+                                                        <div role="tab" aria-disabled="false" aria-selected="false"
+                                                             class="rc-tabs-tab">章节视频
+                                                        </div>
+                                                        <div role="tab" aria-disabled="false" aria-selected="false"
+                                                             class="rc-tabs-tab">问答评论
+                                                        </div>
+                                                    </div>
+                                                    <div class="rc-tabs-ink-bar rc-tabs-ink-bar-animated"
+                                                         style="display: block; transform: translate3d(0px, 0px, 0px); width: 56px;"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="rc-tabs-content rc-tabs-content-no-animated">
+                                    <div role="tabpanel" aria-hidden="false"
+                                         class="rc-tabs-tabpane rc-tabs-tabpane-active">
+                                        <div class="_2iAP3">
+                                            <div class="media-wrap image-wrap">
+                                                {{ course.detail | safe }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div role="tabpanel" aria-hidden="true"
+                                         class="rc-tabs-tabpane rc-tabs-tabpane-inactive">
+                                        <div class="_2iAP3">
+                                            <ul class="swtS9">
+                                                <li id="notice"><strong>课程公告：</strong>{{ course.notice }}</li>
+                                                <li>
+                                                    {% for lesson in course.get_course_lesson %}
+                                                        <div><span>{{ lesson.name }} </span>
+                                                        </div>
+                                                        <ul class="_2qi1f">
+                                                            {% for video in lesson.get_lesson_video %}
+                                                                <li><a href="{% url 'course:video_play' video.id %}"
+                                                                       target="_blank" rel="noopener noreferrer"><i></i><span
+                                                                        data-id="{{ video.id }}">{{ video.name }}</span><span
+                                                                        style="float: right;">{{ video.learn_times }}</span></a>
+                                                                </li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    {% endfor %}
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div role="tabpanel" aria-hidden="true"
+                                         class="rc-tabs-tabpane rc-tabs-tabpane-inactive">
+                                        <div class="_2iAP3">
+                                            <ul class="mod-post" id="comment-list">
+                                                {% for course_comment in course_comments %}
+                                                    <li class="post-row">
+                                                        <div class="media">
+                                                        <span target="_blank">
+                                                            {% if course_comment.user.image != '' %}
+                                                                <img src="
+                                                                        {{ MEDIA_URL }}{{ course_comment.user.image }}"
+                                                                     width="40" height="40">
+                                                            {% else %}
+                                                                <img src="{{ MEDIA_URL }}image/users/home_default_header.png"
+                                                                     width="40" height="40">
+                                                            {% endif %}
+                                                        </span>
+                                                        </div>
+                                                        <div class="bd">
+                                                            <div class="tit">
+                                                                <span target="_blank">{{ course_comment.user }}</span>
+                                                            </div>
+                                                            <p class="cnt">{{ course_comment.content }}</p>
+                                                            <div class="footer clearfix">
+                                                                <span title="评论时间"
+                                                                      class="r timeago">评论时间：{{ course_comment.add_time }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="_2XDnV">
+                            <div class="S23WS">老师提示</div>
+                            <ul class="_39u74" style="padding-bottom: 0px;">
+                                <li>
+
+                                    <div class="_2yY9a">
+                                        <img alt="{{ teacher.name }}"
+                                             src="{{ MEDIA_URL }}{{ teacher.image }}">
+                                        <div class="subcribe"><span>
+                                            {% if has_fav_teacher == True %}
+                                                取消关注
+                                            {% else %}
+                                                点击关注
+                                            {% endif %}
+                                        </span></div>
+                                        <span style="font-weight: bold;color: #14191e;margin-left:15px;">{{ teacher.name }}</span>
+                                        <span style="font-size: 12px;color: #787d82;margin-left:5px;">{{ teacher.work_position }}</span>
+                                    </div>
+                                    <div class="course-info-tip">
+                                        <dl class="first">
+                                            <dt>课程须知</dt>
+                                            <dd class="autowrap">{{ course.youneed_know }}</dd>
+                                        </dl>
+                                        <dl>
+                                            <dt>老师告诉你能学到什么？</dt>
+                                            <dd class="autowrap">{{ course.teacher_tell }}</dd>
+                                        </dl>
+                                    </div>
+                                </li>
+
+                            </ul>
+                            <div class="S23WS" style="margin-top: 30px;">老师介绍</div>
+                            <ul class="_39u74">
+                                <li>
+                                    <div class="_2yY9a" style="padding-top:10px;">
+                                        <div class="_3dpLX" style="padding-top:0px;margin-top: 0px;">
+                                            发布课程：<a
+                                                href="{% url 'course:course_list' %}?teacher={{ teacher.id }}">{{ teacher.get_course_nums }}</a>
+                                            个
+                                        </div>
+                                        <div class="_3dpLX">工作年限：{{ teacher.work_years }}年</div>
+                                        <div class="_3dpLX">就职企业：{{ teacher.work_company }}</div>
+                                        <div class="_3dpLX">教学特点：{{ teacher.points }}</div>
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="S23WS" style="margin-top: 20px;">课程资料</div>
+                            <ul class="_39u74">
+                                <li>
+                                    <div class="_2yY9a">
+                                        {% for course_resource in course_resources %}
+                                            <div class="_3dpLX"
+                                                 style="margin-top:10px;border-bottom:1px solid #eee;padding-left: 28px;padding-bottom: 2px;background: url({% static 'mooc/image/down_file.png' %}) no-repeat">{{ course_resource.name }}<span
+                                                    style="float: right"><a
+                                                    href="{{ MEDIA_URL }}{{ course_resource.download }}">下载</a></span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </li>
+                            </ul>
+                            <div class="S23WS" style="margin-top: 20px;">学过该课的同学还学过</div>
+                            <ul class="_39u74" style="padding-bottom: 5px;">
+                                {% for relate_course in relate_courses %}
+                                    <li class="curr">
+                                        <a href="{% url 'course:course_detail' relate_course.id %}"
+                                           target="_blank">
+                                            <img src="{{ MEDIA_URL }}{{ relate_course.image }}"
+                                                 alt="{{ relate_course.name }}">
+                                            <span class="name autowrap">{{ relate_course.name }}</span>
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="_3LWKs">
+            <div class="w1200">
+                <div class="_3aJyk"><p class="_2DW2R"><a href="javascript:;"><img
+                        src="{% static 'mooc/image/footer_subwb.png' %}" alt="关注微博"><img
+                        src="{% static 'mooc/image/footer_qrwb.jpg' %}"
+                        alt="大图" class="_2zzbZ"></a><a href="javascript:;"><img
+                        src="{% static 'mooc/image/footer_subwx.png' %}" alt="关注微信"><img
+                        src="{% static 'mooc/image/footer_qrwx.jpg' %}"
+                        alt="大图" class="_2zzbZ"></a></p><img
+                        src="{% static 'mooc/image/footer_phone.png' %}" alt="联系方式"></div>
+                <div class="yd8x8">
+                    <div class="_2LU72">
+                        <div class="_3qvba">
+                            <div class="_3NmFM"><a target="_blank" rel="noopener noreferrer"
+                                                   href="http://www.miitbeian.gov.cn">备案号：{{ company.ICP_REC }}</a>
+                                <a target="_blank" rel="noopener noreferrer" href="#">公网安备{{ company.SECURITY_REC }}</a>
+                                <a href="#" target="_blank" rel="noopener noreferrer" title="行业认证">
+                                    <img height="15" src="{% static 'mooc/image/footer_hyrz.png' %}" alt="lm"></a>
+                            </div>
+                            <p>Copyright © 2019 {{ company.SITE }}-{{ company.COMPANY }} 版权所有</p></div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+<div class="tipMask" style="display: none;">
+    <div class="tipContainer"></div>
+</div>
+</body>
+</html>

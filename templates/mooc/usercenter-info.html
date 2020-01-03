@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load staticfiles %}
+<head>
+    <meta charset="UTF-8">
+    <title>个人中心-{{ company.SITE }}</title>
+    <link href="{% static 'mooc/css/usercenter.css' %}" rel="stylesheet">
+    <script src="{% static 'js/jquery-3.4.1.min.js' %}"></script>
+    <script src="{% static 'js/laydate/laydate.js' %}"></script>
+    <script src="{% static 'js/jquery.upload.js' %}"></script>
+    <script src="{% static 'js/jquery-migrate-1.2.1.min.js' %}"></script>
+    <script src="{% static 'mooc/js/usercenter.js' %}"></script>
+    <script src="{% static 'mooc/js/common.js' %}"></script>
+    <script>
+        $(function () {
+            //laydate date selector
+            laydate.render({
+                elem: '#birthday',
+                theme: '#108ee9'
+            });
+
+            //get email code
+            $(".get_email_code").click(function () {
+                new_email = $(".new_email").val()
+                if (!check_email(new_email)) {
+                    alert("邮箱格式错误！");
+                    return false;
+                }
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'users:sendemail_code' %}",
+                    data: {new_email: new_email},
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.Code == 1) {
+                            alert(data.Msg)
+                            window.parent.location.href = "{% url 'users:user_info' %}";
+                        } else {
+                            alert(data.Msg)
+                        }
+                    },
+                });
+            })
+
+            //change email
+            $(".change_email").click(function () {
+
+                new_email = $(".new_email").val();
+                code = $(".email_code").val();
+
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'users:update_email' %}",
+                    data: {new_email: new_email, code: code},
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.Code == 0) {
+                            alert(data.Msg);
+                            window.parent.location.href = "{% url 'users:user_info' %}";
+                        } else {
+                            alert(data.Msg);
+                        }
+                    },
+                });
+            })
+
+            //change passowrd
+            $(".change_password").click(function () {
+                oldpwd = $(".oldpwd").val();
+                newpwd1 = $(".newpwd1").val();
+                newpwd2 = $(".newpwd2").val();
+                if (!check_password(oldpwd) && !check_password(newpwd1) && !check_password(newpwd2)) {
+                    alert("密码中必须包含6到15位字母和数字组合！");
+                    return false
+                }
+                if (newpwd1 != newpwd2) {
+                    alert("确认密码与新密码不一致！");
+                    return false;
+                }
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'users:update_pwd' %}",
+                    data: {oldpwd: oldpwd, newpwd1: newpwd1, newpwd2: newpwd2},
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        alert(data.Msg);
+                    },
+                });
+
+            })
+
+            //upload avatar
+            $('.js-img-up').uploadPreview({
+                Img: ".js-img-show", Width: 110, Height: 110, Callback: function () {
+                    $('#jsAvatarForm').submit();
+                    alert("更换头像成功，页面刷新后生效！")
+                }
+            });
+
+            //save user info
+            $(".btnsave").click(function () {
+                nickname = $("._1YMqD").val()
+                gender = $("._2YvKE input:checked").val()
+                qq = $(".qq").val();
+                wechat = $(".wechat").val();
+                birthday = $(".birthday").val();
+                address = $(".address").val();
+                personal = $(".personal").val();
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'users:user_info' %}",
+                    data: {
+                        nickname: nickname,
+                        gender: gender,
+                        qq: qq,
+                        wechat: wechat,
+                        birthday: birthday,
+                        address: address,
+                        personal: personal
+                    },
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.Code == 1) {
+                            alert(data.Msg);
+                            window.location.reload();
+                        }
+                    },
+                });
+            })
+        })
+    </script>
+</head>
+<body>
+<div id="root">
+    <div id="reactRoot">
+        <div class="_2UKj4">
+            <div class="_3UHJr">
+                <div class="_3yuli"><a href="/"><img
+                        src="{% static 'mooc/image/header_logo.png' %}"
+                        alt="logo"></a></div>
+                <div class="JS7zp"><a href="/">首页</a><a href="{% url 'course:course_list' %}">全部课程</a><a href="#"
+                                                                                                         style="display:none;">待定菜单</a>
+                </div>
+                <div class="_1j-ox"><input maxlength="20" type="text" placeholder="搜索课程关键词"><a
+                        href="javascript:;">搜索</a></div>
+                <div class="_217pm">
+                    <div class="_1bEof"><span class="_3iQZm ant-badge"><div class="_3cI36"></div></span>
+                        <div class="_1aqJh"><a href="{% url 'users:user_info' %}">
+                            {% if request.user.image != '' %}
+                                <img title="{{ request.user.nick_name }}"
+                                     src="{{ MEDIA_URL }}{{ request.user.image }}"
+                                     alt="头像" style="position: relative;">
+
+                            {% else %}
+                                <img title="{{ request.user.nickname }}"
+                                     src="{{ MEDIA_URL }}image/users/home_default_header.png"
+                                     alt="头像" style="position: relative;">
+                            {% endif %}
+                        </a>
+                            <div class="_2v85p"><em class="member-box"></em>
+                                <ul>
+                                    <li><a href="{% url 'users:mycourse' %}">学习课程</a></li>
+                                    <li><a href="{% url 'users:user_info' %}">个人信息</a></li>
+                                    <li><a href="{% url 'logout' %}">退出登录</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        {% if request.user.nick_name != '' %}
+                            <span class="_3Au-A userNickname"
+                                  title="{{ request.user.nick_name }}">{{ request.user.nick_name }}</span>
+                        {% else %}
+                            <span class="_3Au-A userNickname"
+                                  title="{{ request.user.username }}">{{ request.user.username }}</span>
+                        {% endif %}
+                        <div>
+                            <div class="oh0MF react-draggable" id="private_chat_win"
+                                 style="touch-action: none; top: 94.5px; left: 250px; transform: translate(0px, 0px);display: none;">
+                                <div class="_338sv" id="private_contact_wrap" style="width: 0px;">
+                                    <ul class="_2vNN5"></ul>
+                                </div>
+                                <div class="b1hd_" style="margin-left: 0px;">
+                                    <div class="_1fbBO" id="chat_with_info"><span></span><span class="_3HSzw"></span>
+                                    </div>
+                                    <div class="-rUZG">
+                                        <div class="s3gIE"><img
+                                                src="{% static 'mooc/image/NoNo.32f2bd65.jpg' %}"
+                                                alt="not-chat"><span>暂无新消息</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="_3p0h7">
+            <div class="_3WUlw">
+                <ul>
+                    <li class="-jFKi"><a href="{% url 'users:mycourse' %}">学习课程</a></li>
+                    <li class="-jFKi"><a href="{% url 'users:myfav_course' %}">收藏课程</a></li>
+                    <li class="-jFKi"><a href="{% url 'users:myfav_teacher' %}">关注老师</a></li>
+                    <li class="VrjG_ -jFKi"><a href="{% url 'users:user_info' %}">个人资料</a></li>
+                </ul>
+            </div>
+            <div class="qtQ6s">
+                <div class="adminContentBody">
+                    <div class="_1NC1D">
+                        <div class="rc-tabs rc-tabs-top">
+                            <div role="tablist" class="rc-tabs-bar" tabindex="0">
+                                <div class="rc-tabs-nav-container"><span unselectable="unselectable"
+                                                                         class="rc-tabs-tab-prev rc-tabs-tab-btn-disabled"><span
+                                        class="rc-tabs-tab-prev-icon"></span></span><span unselectable="unselectable"
+                                                                                          class="rc-tabs-tab-next rc-tabs-tab-btn-disabled"><span
+                                        class="rc-tabs-tab-next-icon"></span></span>
+                                    <div class="rc-tabs-nav-wrap">
+                                        <div class="rc-tabs-nav-scroll">
+                                            <div class="rc-tabs-nav rc-tabs-nav-animated">
+                                                <div>
+                                                    <div role="tab" aria-disabled="false" aria-selected="true"
+                                                         class="rc-tabs-tab-active rc-tabs-tab">个人信息
+                                                    </div>
+                                                    <div role="tab" aria-disabled="false" aria-selected="false"
+                                                         class=" rc-tabs-tab">修改密码
+                                                    </div>
+                                                    <div role="tab" aria-disabled="false" aria-selected="false"
+                                                         class=" rc-tabs-tab">修改邮箱
+                                                    </div>
+                                                </div>
+                                                <div class="rc-tabs-ink-bar rc-tabs-ink-bar-animated"
+                                                     style="display: block; transform: translate3d(0px, 0px, 0px); width: 96px;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="rc-tabs-content rc-tabs-content-no-animated">
+                                <div role="tabpanel" aria-hidden="false" class="rc-tabs-tabpane rc-tabs-tabpane-active"
+                                     style="margin-top: 0px;">
+                                    <div class="_1Zcg9">
+                                        <div class="_2u4ro">
+                                            <div>
+                                                <table cellspacing="15px" class="_319EJ">
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>账号：</td>
+                                                        <td>{{ request.user.username }}<a href="javascript:;"
+                                                                                          class="_2uLFV">修改密码</a>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span>昵称：</span><i>*</i></td>
+                                                        <td><input type="text" class="_1YMqD"
+                                                                   placeholder="昵称长度2-11个字，可以是汉字、字母、或数字"
+                                                                   value="{{ request.user.nick_name }}">
+                                                            <p class="_1dh-i"></p></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>头像：</td>
+                                                        <td>
+                                                            <div>
+                                                                <div class="dhuTH">
+                                                                    {% if request.user.image != '' %}
+                                                                        <img class="js-img-up" src="
+                                                                                {{ MEDIA_URL }}{{ request.user.image }}"
+                                                                             alt="头像">
+                                                                    {% else %}
+                                                                        <img class="js-img-show"
+                                                                             src="{{ MEDIA_URL }}image/users/home_default_header.png"
+                                                                             alt="头像">
+                                                                    {% endif %}
+                                                                </div>
+                                                                <div class="_3-8YK">
+                                                                    <div style="margin-bottom: 20px;">
+                                                                        支持jpg、gif、png或bmp格式的图片，小于5M
+                                                                    </div>
+                                                                    <div>
+                                                                        <iframe id='frameFile' name='frameFile'
+                                                                                style='display: none;'></iframe>
+                                                                        <form class="clearfix" id="jsAvatarForm"
+                                                                              enctype="multipart/form-data"
+                                                                              autocomplete="off" method="post"
+                                                                              action="{% url 'users:image_upload' %}"
+                                                                              target='frameFile'>
+                                                                            <label for="image-clip-upload-input"
+                                                                                   class="XqBc3">修改头像<input type="file"
+                                                                                                            name="image"
+                                                                                                            id="image-clip-upload-input"
+                                                                                                            class="js-img-up"/></label>{% csrf_token %}
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>性别：</td>
+                                                        <td>
+                                                            <div><label class="_2YvKE" for="male"><input type="radio"
+                                                                                                         name="infoSexRadio"
+                                                                                                         id="male"
+                                                                                                         value="1"
+                                                                                                         {% if request.user.gender == '1' %}checked="checked"{% endif %}>&nbsp;男</label><label
+                                                                    class="_2YvKE" for="female"><input type="radio"
+                                                                                                       name="infoSexRadio"
+                                                                                                       id="female"
+                                                                                                       value="0"
+                                                                                                       {% if request.user.gender == '0' %}checked="checked"{% endif %}>&nbsp;女</label>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>常用邮箱：</td>
+                                                        <td><span
+                                                                style="float: left; width: 200px; line-height: 2;">{{ request.user.email }}</span><a
+                                                                href="javascript:;" class="_2uLFV">
+                                                            {% if request.user.email != '' %}
+                                                                修改邮箱
+                                                            {% else %}
+                                                                绑定邮箱
+                                                            {% endif %}
+                                                        </a></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span>QQ号：</span></td>
+                                                        <td><input type="text" class="_3lIvW qq"
+                                                                   placeholder="请输入常用的QQ号码"
+                                                                   value="{{ request.user.qq }}">
+                                                            <p class="_1dh-i"></p></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span>微信：</span></td>
+                                                        <td><input type="text" class="_3lIvW wechat" placeholder="请输入微信"
+                                                                   value="{{ request.user.wechat }}">
+                                                            <p class="_1dh-i"></p></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>生日：</td>
+                                                        <td><input title="点击选择日期" placeholder="选择日期"
+                                                                   class="_2AmVs birthday" id="birthday"
+                                                                   value="{{ request.user.birthday|date:'Y-m-d' }}">
+                                                            <p class="_1dh-i"></p></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td><span>地址：</span></td>
+                                                        <td><input type="text" class="_3lIvW address"
+                                                                   style="width: 400px" placeholder="请输入你的联系地址"
+                                                                   value="{{ request.user.address }}">
+                                                            <p class="_1dh-i"></p></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>个性签名：</td>
+                                                        <td><textarea maxlength="50" class="_2uDW_ personal"
+                                                                      placeholder="请填写签名，50个字内">{{ request.user.personal }}</textarea>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td>
+                                                            <button class="_1ciMK btnsave">保存</button>
+                                                            <button class="_1ciMK"
+                                                                    style="margin-left: 20px; background: rgb(162, 162, 162);">
+                                                                取消
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div role="tabpanel" aria-hidden="true" class="rc-tabs-tabpane rc-tabs-tabpane-inactive"
+                                     style="margin-top: 0px;">
+                                    <div>
+                                        <table cellspacing="15" cellpadding="" class="_319EJ">
+                                            <tbody>
+                                            <tr>
+                                                <td>旧密码：</td>
+                                                <td><input type="password" class="_2BajC oldpwd" placeholder="请输入旧密码"
+                                                           value="">
+                                                    <p class="_1dh-i"></p><a class="_2a_yP"
+                                                                             href="{% url 'users:forget_pwd' %}">忘记密码？</a>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>新密码：</td>
+                                                <td><input type="password" class="_2BajC newpwd1" placeholder="请输入新密码"
+                                                           value="">
+                                                    <p class="_1dh-i"></p></td>
+                                            </tr>
+                                            <tr>
+                                                <td>确认密码：</td>
+                                                <td><input type="password" class="_2BajC newpwd2" placeholder="请确认新密码"
+                                                           value="">
+                                                    <p class="_1dh-i"></p></td>
+                                            </tr>
+                                            <tr>
+                                                <td></td>
+                                                <td>
+                                                    <button class="_2DJUq change_password">确定</button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div role="tabpanel" aria-hidden="true" class="rc-tabs-tabpane rc-tabs-tabpane-inactive"
+                                     style="margin-top: 0px;">
+                                    <div class="_1Zcg9">
+                                        <div class="_2u4ro">
+                                            <div>
+                                                <table cellspacing="15" cellpadding="" class="_319EJ">
+                                                    <tbody>
+                                                    <tr>
+                                                        <td>新邮箱：</td>
+                                                        <td><input type="text" class="_2BajC new_email"
+                                                                   placeholder="请输入新邮箱"
+                                                                   value=""></td>
+                                                        <td style="color: red;"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>邮箱验证码：</td>
+                                                        <td><input type="text" class="_2BajC email_code"
+                                                                   placeholder="请输入邮箱验证码" maxlength="6" value=""
+                                                                   style="width: 180px; vertical-align: bottom;">
+                                                            <button class="_3FBPh get_email_code">获取验证码</button>
+                                                        </td>
+                                                        <td style="color: red;"></td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td>
+                                                            <button class="_2DJUq change_email" style="display: block;">
+                                                                确定
+                                                            </button>
+                                                            <div style="display: none;">已发送邮件至 「」，请查收确认<br> 没收到？<a
+                                                                    href="javascript:;" style="color: blue;">重新发送</a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer class="_3LWKs">
+            <div class="w1200">
+                <div class="_3aJyk"><p class="_2DW2R"><a href="javascript:;"><img
+                        src="/static/mooc/image/footer_subwb.png" alt="关注微博"><img
+                        src="/static/mooc/image/footer_qrwb.jpg" alt="大图" class="_2zzbZ"></a><a
+                        href="javascript:;"><img src="/static/mooc/image/footer_subwx.png"
+                                                 alt="关注微信"><img src="/static/mooc/image/footer_qrwx.jpg"
+                                                                 alt="大图" class="_2zzbZ"></a></p><img
+                        src="/static/mooc/image/footer_phone.png" alt="联系方式"></div>
+                <div class="yd8x8">
+                    <div class="_2LU72">
+                        <div class="_3qvba">
+                            <div class="_3NmFM"><a target="_blank" rel="noopener noreferrer"
+                                                   href="http://www.miitbeian.gov.cn">备案号：{{ company.ICP_REC }}</a><a
+                                    target="_blank" rel="noopener noreferrer" href="#">公网安备
+                                {{ company.SECURITY_REC }}</a><a href="#" target="_blank" rel="noopener noreferrer" title="行业认证">
+                                <img height="15" src="/static/mooc/image/footer_hyrz.png" alt="lm"></a></div>
+                            <p>Copyright © 2019 {{ company.SITE }}-{{ company.COMPANY }} 版权所有</p></div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+</body>
+</html>
