@@ -24,7 +24,7 @@
 ## Bug反馈，建议和获取最新动态
 ![avatar](https://github.com/ZREDU-007/zrmooc/blob/master/qqg.png?raw=true)
 <br/>
-加QQ群（760196377）
+   加QQ群（760196377）
 
 ## 功能预览（部分功能仅限PRO版）
 PRO版本目前基于python3.7和django3.0，后期将推出基于Go的版本
