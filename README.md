@@ -23,6 +23,7 @@
 
 ## Bug反馈，建议和获取最新动态
 ![avatar](https://github.com/ZREDU-007/zrmooc/blob/master/qqg.png?raw=true)
+<br/>
 加QQ群（760196377）
 
 ## 功能预览（部分功能仅限PRO版）
