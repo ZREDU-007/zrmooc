@@ -37,4 +37,5 @@ PRO版本目前基于python3.7和django3.0，后期将推出基于Go的版本
 
 ## SNAPSHOT
 ![avatar](https://github.com/ZREDU-007/zrmooc/blob/master/index.jpg?raw=true)
+
 ![avatar](https://github.com/ZREDU-007/zrmooc/blob/master/course_detail.jpg?raw=true)
