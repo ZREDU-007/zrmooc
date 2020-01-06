@@ -34,3 +34,7 @@ PRO版本目前基于python3.7和django3.0，后期将推出基于Go的版本
 4. 课程分享，评论，笔记，评分,wiki
 5. 支持微信，微博，qq，手机验证码，以及账号密码登录
 6. 文库，考试，资源，社区问答（开发中）
+
+## SNAPSHOT
+![avatar](https://github.com/ZREDU-007/zrmooc/blob/master/index.jpg?raw=true)
+![avatar](https://github.com/ZREDU-007/zrmooc/blob/master/course_detail.jpg?raw=true)
