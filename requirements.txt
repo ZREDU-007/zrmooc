@@ -1,4 +1,4 @@
-Django==1.9
+Django==2.2.24
 django-crispy-forms==1.6.1
 django-formtools==1.0
 django-pure-pagination==0.3.0
